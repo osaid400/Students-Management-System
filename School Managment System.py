@@ -238,13 +238,6 @@ class StudentManager:
         if not found:
             print("Student Not Found!")
 
-    def exit_system(self):
-        print("---------------------------------------------------")
-        print("Exiting the School Management System.")
-        print("Thank you for using the system. Goodbye!")
-        print("---------------------------------------------------")
-        sys.exit()
-
 # ---------------- Main Menu ----------------
 
 def main():
@@ -280,7 +273,11 @@ def main():
         elif choice == 5:
             manager.delete_student()
         elif choice == 0:
-            manager.exit_system()
+            print("---------------------------------------------------")
+            print("Exiting the School Management System.")
+            print("Thank you for using the system. Goodbye!")
+            print("---------------------------------------------------")
+            sys.exit()
         else:
             print("Invalid Choice! Choose between 0 to 5")
 

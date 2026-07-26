@@ -1,36 +1,49 @@
 # School Management System
 
-A console-based School Management System built with Python. This project demonstrates the use of functions, lists, dictionaries, loops, conditional statements, exception handling, and JSON-based file persistence to manage student records.
+A console-based **School Management System** built with Python using **Object-Oriented Programming (OOP)**. This project demonstrates clean class design, JSON-based data persistence, CRUD operations, input validation, exception handling, and composition by managing student records through dedicated classes.
 
 ## Features
 
-* Add a new student (with Student ID, Name, Class, Age, and Date of Birth)
+* Add a new student (Student ID, Name, Grade, Age, and Date of Birth)
 * View all students
-* Search a student by Student ID or Name
+* Search students by **Student ID** or **Name**
 * Update student details
 * Delete a student
 * Prevent duplicate Student IDs
 * Validate user input
-* Persistent storage — student records are saved to a JSON file and reload automatically on the next run
+* Persistent storage using JSON
+* Automatically reload saved student records on startup
+* Clean Object-Oriented design using separate `Student` and `StudentManager` classes
 
 ## Technologies Used
 
 * Python 3
+* JSON
 
 ## Concepts Covered
 
+### Python Fundamentals
+
 * Functions
-* Lists
-* Dictionaries
 * Loops (`for`, `while`)
-* Conditional Statements (`if`, `elif`, `else`)
+* Conditional Statements
 * Exception Handling
 * User Input
 * Data Validation
 * CRUD Operations
 * String Methods (`strip()`, `lower()`)
 * File Handling with JSON (`json.load()`, `json.dump()`)
-* `os.path.exists()` for safe file loading
+* `os.path.exists()`
+
+### Object-Oriented Programming (OOP)
+
+* Classes & Objects
+* Constructors (`__init__`)
+* Instance Methods
+* Encapsulation
+* Object Serialization (`to_dict()`)
+* Magic Method (`__str__()`)
+* Composition
 
 ## Project Structure
 
@@ -42,24 +55,31 @@ School-Management-System/
 └── README.md
 ```
 
-> Note: `students.json` is created automatically when the program runs and stores student data locally. It is excluded from the repository via `.gitignore` since it holds runtime/test data rather than source code.
+> **Note:** `students.json` is automatically created when the program runs. It stores student records locally and is excluded from the repository via `.gitignore` because it contains runtime data rather than source code.
 
 ## How to Run
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/osaid400/School-Management-System.git
 ```
+
 2. Navigate to the project folder:
+
 ```bash
 cd School-Management-System
 ```
+
 3. Run the program:
+
 ```bash
 python "School Management System.py"
 ```
 
 ## Example Output
+
+### Main Menu
 
 ```text
 ============ Welcome to School Management System ============
@@ -71,44 +91,56 @@ python "School Management System.py"
 4. Update Student
 5. Delete Student
 0. Exit
-Enter the number: 3
+```
+
+### Searching a Student
+
+```text
 Search by 'ID' or 'Name': ID
+
 Enter the Student ID: 1
-==================================================
-Student ID: 1
-Name: Ali
-Class: 9th
-Age: 15
-Date of Birth: 12-03-2011
-==================================================
+
+--------------------------------------------------
+Student ID     : 1
+Name           : Ali
+Age            : 15
+Grade          : 9th
+Date of Birth  : 12-03-2010
+--------------------------------------------------
 ```
 
 ## How Data Persistence Works
 
-* On startup, the program checks if `students.json` exists using `os.path.exists()`.
-* If it exists, all student records are loaded into memory using `json.load()`.
-* If it doesn't exist, the program starts with a default set of sample students and saves them to `students.json`.
-* Every time a student is added, updated, or deleted, the full student list is saved back to `students.json` using `json.dump()`, so no data is lost between runs.
+* When the application starts, it checks whether `students.json` exists.
+* If the file exists, all student records are loaded and converted into `Student` objects.
+* If the file does not exist, an empty student list is created.
+* Whenever a student is added, updated, or deleted, all student objects are converted into dictionaries using `to_dict()` and saved back to `students.json`.
+* This ensures that student records remain available even after closing and reopening the application.
 
 ## Future Improvements
 
-* Add student marks and grades
-* Sort students by class or age
-* Export and import student records
-* Migrate from JSON file storage to SQLite
-* Implement Object-Oriented Programming (OOP)
+* Search students by Grade
+* Sort students by Grade or Age
+* Export student records to CSV
+* Import student records from CSV
+* Store student records using SQLite
+* Build a GUI version using Tkinter
+* Add attendance management
+* Add marks and report card generation
 
 ## Learning Outcomes
 
 This project helped me practice:
 
-* Writing modular code using functions
-* Managing data with lists and dictionaries
+* Designing applications using Object-Oriented Programming
+* Creating reusable classes and objects
+* Applying Composition between classes
+* Using the `__str__()` magic method
 * Performing CRUD operations
-* Searching records using different criteria
+* Managing persistent data using JSON
+* Building scalable menu-driven applications
 * Handling exceptions and validating user input
-* Building a menu-driven console application
-* Persisting data between program runs using JSON file handling
+* Writing clean, maintainable, and modular Python code
 
 ## Author
 
