@@ -2,7 +2,7 @@
 
 import sys
 import calendar
-import json
+import os
 from src.models import Student
 from src.manager import StudentManager
 
@@ -14,7 +14,7 @@ class SchoolUI:
     def run(self):
         print("============ Welcome to School Management System ============")
         while True:
-            print("\n=============== Select the Option (0-7) ===============")
+            print("\n=============== Select the Option (0-8) ===============")
             print("1. Add Student")
             print("2. View All Students")
             print("3. Search Student (ID / Name / Grade)")
@@ -22,6 +22,7 @@ class SchoolUI:
             print("5. Delete Student")
             print("6. Attendance Calendar View")
             print("7. Marks & Report Card")
+            print("8. Export Report Card (.txt)")
             print("0. Exit")
 
             try:
@@ -44,13 +45,15 @@ class SchoolUI:
                 self.handle_attendance_calendar()
             elif choice == 7:
                 self.handle_marks()
+            elif choice == 8:
+                self.handle_export_report_card()
             elif choice == 0:
                 print("---------------------------------------------------")
                 print("Exiting the School Management System. Goodbye!")
                 print("---------------------------------------------------")
                 sys.exit()
             else:
-                print("Invalid Choice! Choose between 0 to 7")
+                print("Invalid Choice! Choose between 0 to 8")
 
     def handle_add_student(self):
         name = input("Enter the student name: ").strip()
@@ -89,23 +92,32 @@ class SchoolUI:
             print("-" * 60)
             return
 
-        grades_dict = {}
-        for student in students:
-            grade = student.grade
-            if grade not in grades_dict:
-                grades_dict[grade] = []
-            grades_dict[grade].append(student)
+        print("\nView Options: 1. All Classes  2. Specific Class")
+        choice = input("Enter option: ")
 
+        if choice == "2":
+            grade_input = input("Enter Grade to filter: ").strip()
+            filtered = [s for s in students if grade_input.lower() in s.grade.lower()]
+            if not filtered:
+                print("No students found in this grade.")
+                return
+            self._print_student_table({grade_input: filtered})
+        else:
+            grades_dict = {}
+            for s in students:
+                grades_dict.setdefault(s.grade, []).append(s)
+            self._print_student_table(grades_dict)
+
+    def _print_student_table(self, grades_dict):
         for grade, std_list in grades_dict.items():
-            print(f"\n========================== Grade {grade} ========================")
+            print(f"\n=========================== Grade {grade} =========================")
             print(f"{'Student ID':<15} {'Student Name':<20} {'Age':<10} {'Date of Birth':<15}")
-            print("=" * 60)
-            for student in std_list:
-                print(f"{str(student.student_id):<15} {student.name:<20} {str(student.age):<10} {student.date_of_birth:<15}")
-            print("=" * 60)
+            print("=" * 64)
+            for s in std_list:
+                print(f"{str(s.student_id):<15} {s.name:<20} {str(s.age):<10} {s.date_of_birth:<15}")
+            print("=" * 64)
 
     def handle_search_student(self):
-
         search_choice = input("Search by 'ID', 'Name', or 'Grade': ").strip().lower()
 
         if search_choice == "id":
@@ -116,7 +128,6 @@ class SchoolUI:
                 return
             student = self.manager.search_by_id(search_id)
             if student:
-                # Single student ko bhi table format mein print karne ke liye
                 self._print_student_table({student.grade: [student]})
             else:
                 print("-" * 64)
@@ -144,7 +155,6 @@ class SchoolUI:
             if not search_grade:
                 print("Grade cannot be empty!")
                 return
-            # Flexible search taake '10' likhne par '10th' ya 'Grade 10' bhi aa jaye
             all_students = self.manager.view_students()
             results = [s for s in all_students if search_grade.lower() in s.grade.lower()]
             
@@ -277,11 +287,9 @@ class SchoolUI:
             print(row_str)
         print("=" * 85)
 
-        # Filter records specifically for the chosen month
         month_prefix = f"{year}-{month:02d}-"
         monthly_records = {k: v for k, v in student_records.items() if k.startswith(month_prefix)}
 
-        # Monthly Attendance Summary
         total_days = list(monthly_records.values())
         present = total_days.count("P")
         absent = total_days.count("A")
@@ -292,108 +300,52 @@ class SchoolUI:
         print(f"Present: {present} | Absent: {absent} | Leave: {leave}")
         print("=================================================================")
 
-    def handle_view_students_table(self):
-        students = self.manager.view_students()
-        if not students:
-            print("No students found!")
+    def handle_marks(self):
+        # Narrowed try-except scope exclusively around input parsing
+        try:
+            s_id = int(input("Enter Student ID: "))
+        except ValueError:
+            print("Invalid Student ID format!")
             return
 
-        print("\nView Options: 1. All Classes  2. Specific Class")
-        choice = input("Enter option: ")
+        student = self.manager.search_by_id(s_id)
+        if not student:
+            print("Student not found!")
+            return
+        
+        report_output = student.generate_report_card()
+        if not report_output:
+            print("No marks record found for this student!")
+            return
+            
+        print(report_output)
 
-        if choice == "2":
-            grade_input = input("Enter Grade to filter: ").strip()
-            filtered = [s for s in students if grade_input.lower() in s.grade.lower()]
-            if not filtered:
-                print("No students found in this grade.")
-                return
-            self._print_student_table({grade_input: filtered})
-        else:
-            # All classes
-            grades_dict = {}
-            for s in students:
-                grades_dict.setdefault(s.grade, []).append(s)
-            self._print_student_table(grades_dict)
-
-    def _print_student_table(self, grades_dict):
-        for grade, std_list in grades_dict.items():
-            print(f"\n============================ Grade {grade} ===========================")
-            print(f"{'Student ID':<15} {'Student Name':<20} {'Age':<10} {'Date of Birth':<15}")
-            print("=" * 64)
-            for s in std_list:
-                print(f"{str(s.student_id):<15} {s.name:<20} {str(s.age):<10} {s.date_of_birth:<15}")
-            print("=" * 64)
-
-    def handle_marks(self):
+    def handle_export_report_card(self):
         try:
-            s_id = input("Enter Student ID: ")
-            student = self.manager.search_by_id(int(s_id))
-            if not student:
-                print("Student not found!")
-                return
-            
-            # Load marks from JSON
-            with open("data/marks.json", "r") as f:
-                all_marks = json.load(f)
-            
-            student_marks = all_marks.get(s_id, {})
-            
-            for exam in ["First Term Exam", "Mid Term Exam", "Final Term Exam"]:
-                data = student_marks.get(exam)
-                if not data:
-                    continue
-                
-                print(f"\n===================== {exam.upper()} ======================")
-                
-                if isinstance(data, str): # For Final Term if stored as a status string
-                    print(f"Status: {data}")
-                else:
-                    print(f"{'Subject':<15} {'Marks':<10} {'Grade':<10} {'Remarks'}")
-                    print("-" * 60)
-                    
-                    total_marks = 0
-                    max_marks = len(data) * 100 # Har subject 100 marks ka hai
-                    
-                    for sub, score in data.items():
-                        total_marks += score
-                        
-                        # Individual Subject Grade logic
-                        if score >= 80:
-                            grade = "A+"
-                        elif score >= 70:
-                            grade = "A"
-                        elif score >= 60:
-                            grade = "B"
-                        elif score >= 50:
-                            grade = "C"
-                        else:
-                            grade = "F"
-                            
-                        # Remarks logic
-                        if score >= 60: 
-                            rem = "Good"
-                        else: 
-                            rem = "Needs Improvement"
-                            
-                        print(f"{sub:<15} {score:<10} {grade:<10} {rem}")
-                        
-                    # Calculate Percentage and Overall Grade
-                    percentage = (total_marks / max_marks) * 100 if max_marks > 0 else 0
-                    
-                    if percentage >= 80:
-                        overall_grade = "A+"
-                    elif percentage >= 70:
-                        overall_grade = "A"
-                    elif percentage >= 60:
-                        overall_grade = "B"
-                    elif percentage >= 50:
-                        overall_grade = "C"
-                    else:
-                        overall_grade = "F"
-                        
-                    print("-" * 60)
-                    print(f"Percentage: {percentage:.2f}%                    Overall Grade: {overall_grade}")
-                    print("============================================================")
-                    
-        except FileNotFoundError:
-            print("Marks data file not found!")
+            s_id = int(input("Enter Student ID: "))
+        except ValueError:
+            print("Invalid ID format!")
+            return
+
+        student = self.manager.search_by_id(s_id)
+        if not student:
+            print("Student not found!")
+            return
+
+        report_output = student.generate_report_card()
+        if not report_output:
+            print("No marks record found for this student!")
+            return
+
+        grade_folder = student.grade.replace(" ", "_").lower()
+        output_dir = os.path.join("reports", grade_folder)
+        os.makedirs(output_dir, exist_ok=True)
+
+        clean_name = student.name.replace(" ", "_").lower()
+        filename = f"{clean_name}_{student.student_id}_result.txt"
+        filepath = os.path.join(output_dir, filename)
+
+        with open(filepath, "w", encoding="utf-8") as file:
+            file.write(report_output)
+        
+        print(f"\n[Success] Report Card saved at: {filepath}")

@@ -4,10 +4,14 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Virtual Environment (Agar aapne use kiya ho)
+# Virtual Environment
 venv/
 env/
 ENV/
+.venv/
 
-# Local Database / JSON Data Files (Taake local students, attendance aur marks ka data git par track na ho)
+# Local Database / JSON Data Files (Students, Marks, Attendance)
 data/*.json
+
+# Exported Report Cards Folder
+reports/

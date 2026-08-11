@@ -1,6 +1,8 @@
-# src/ manager.py
+# src/manager.py
+
 import json
 import os
+from datetime import datetime
 from src.models import Student
 
 class StudentManager:
@@ -14,16 +16,7 @@ class StudentManager:
             try:
                 with open(self.filename, "r") as file:
                     data = json.load(file)
-                    self.students = []
-                    for item in data:
-                        s_id = item.get("Student ID")
-                        name = item.get("Name")
-                        age = item.get("Age", 0)
-                        grade = item.get("Grade", "Unknown")
-                        dob = item.get("Date of Birth", "")
-                        marks = item.get("Marks", {})
-                        
-                        self.students.append(Student(s_id, name, age, grade, dob, marks))
+                    self.students = [Student.from_dict(item) for item in data]
             except (json.JSONDecodeError, KeyError):
                 print("Warning: Failed to parse students file. Starting fresh.")
                 self.students = []
@@ -40,10 +33,14 @@ class StudentManager:
             return 1
         return max(student.student_id for student in self.students) + 1
 
-    def _get_attendance_filename(self, year=2026):
+    def _get_attendance_filename(self, year=None):
+        if year is None:
+            year = datetime.now().year
         return f"data/attendance_{year}.json"
 
-    def load_yearly_attendance(self, year=2026):
+    def load_yearly_attendance(self, year=None):
+        if year is None:
+            year = datetime.now().year
         att_file = self._get_attendance_filename(year)
         if os.path.exists(att_file):
             try:
@@ -53,12 +50,16 @@ class StudentManager:
                 return {}
         return {}
 
-    def save_yearly_attendance(self, attendance_data, year=2026):
+    def save_yearly_attendance(self, attendance_data, year=None):
+        if year is None:
+            year = datetime.now().year
         att_file = self._get_attendance_filename(year)
         with open(att_file, "w") as file:
             json.dump(attendance_data, file, indent=4)
 
-    def mark_attendance_date(self, student_id, date_str, status, year=2026):
+    def mark_attendance_date(self, student_id, date_str, status, year=None):
+        if year is None:
+            year = datetime.now().year
         att_data = self.load_yearly_attendance(year)
         s_id_str = str(student_id)
         
@@ -107,12 +108,6 @@ class StudentManager:
             return student
         return None
 
-    def load_marks(self):
-        if os.path.exists("data/marks.json"):
-            with open("data/marks.json", "r") as f:
-                return json.load(f)
-        return {}
-
     def get_remarks(self, marks):
         if marks >= 90: return "Excellent"
         if marks >= 80: return "Very Good"
@@ -122,7 +117,7 @@ class StudentManager:
     def update_marks(self, search_id, subject, score):
         student = self.search_by_id(search_id)
         if student:
-            student.marks[subject] = score
+            student.update_marks(subject, score)
             self.save_students()
             return True
         return False
