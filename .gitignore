@@ -1,17 +1,24 @@
-# Python Cache files
+# Runtime data (auto-generated, not source code)
+data/
+reports/
+
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+.Python
+*.egg-info/
 
-# Virtual Environment
+# Virtual environments
 venv/
 env/
-ENV/
 .venv/
 
-# Local Database / JSON Data Files (Students, Marks, Attendance)
-data/*.json
+# Editor/IDE
+.vscode/
+.idea/
 
-# Exported Report Cards Folder
-reports/
+# OS-specific
+.DS_Store
+Thumbs.db
