@@ -1,1 +1,13 @@
-students.json
+# Python Cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environment (Agar aapne use kiya ho)
+venv/
+env/
+ENV/
+
+# Local Database / JSON Data Files (Taake local students, attendance aur marks ka data git par track na ho)
+data/*.json
